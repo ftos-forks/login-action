@@ -24,6 +24,7 @@ ___
   * [OCI Oracle Cloud Infrastructure Registry (OCIR)](#oci-oracle-cloud-infrastructure-registry-ocir)
   * [Quay.io](#quayio)
   * [DigitalOcean](#digitalocean-container-registry)
+  * [Authenticate to multiple registries](#authenticate-to-multiple-registries)
 * [Customizing](#customizing)
   * [inputs](#inputs)
 * [Contributing](#contributing)
@@ -494,6 +495,35 @@ jobs:
           password: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 ```
 
+### Authenticate to multiple registries
+
+You can authenticate to multiple registries by using the `logins` input. Define
+the registries as YAML objects. Each object can contain `registry`, `username`,
+`password` and `ecr` keys similar to current inputs:
+
+```yaml
+name: ci
+
+on:
+  push:
+    branches: main
+
+jobs:
+  login:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Login to registries
+        uses: docker/login-action@v3
+        with:
+          logins: |
+            - username: ${{ vars.DOCKERHUB_USERNAME }}
+              password: ${{ secrets.DOCKERHUB_TOKEN }}
+            - registry: ghcr.io
+              username: ${{ github.actor }}
+              password: ${{ secrets.GITHUB_TOKEN }}
+```
+
 ## Customizing
 
 ### inputs
@@ -507,6 +537,7 @@ The following inputs can be used as `step.with` keys:
 | `password` | String |         | Password or personal access token for authenticating the Docker registry      |
 | `ecr`      | String | `auto`  | Specifies whether the given registry is ECR (`auto`, `true` or `false`)       |
 | `logout`   | Bool   | `true`  | Log out from the Docker registry at the end of a job                          |
+| `logins`   | YAML   |         | Add multiple registries to authenticate to, defined as YAML objects           |
 
 ## Contributing
 
